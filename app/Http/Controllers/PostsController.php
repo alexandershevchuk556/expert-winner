@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Post;
+use App\User;
 use Illuminate\Http\Request;
 use  Intervention\Image\Facades\Image;
 
@@ -17,11 +18,21 @@ class PostsController extends Controller
 
     public function index()
     {
-        $users = auth()->user()->following()->pluck('profiles.user_id');
-        
-        $posts = Post::whereIn('user_id', $users)->with('user')->latest()->paginate(5);
+        if (auth()->user()->following()->count()) {
 
-        return view('posts.index', compact('posts'));
+            $users = auth()->user()->following()->pluck('profiles.user_id');
+            
+            $posts = Post::whereIn('user_id', $users)->with('user')->latest()->paginate(5);
+
+            return view('posts.index', compact('posts'));
+        } else {
+
+            $users = User::paginate(15);
+
+            return view('welcome', compact('users'));
+
+        }
+
     }
 
     public function create()
